@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/eiannone/keyboard"
@@ -36,6 +37,8 @@ func findAndReplace(word *[]rune, needle rune, placeHolder rune) {
 	}
 
 }
+
+//make sure that old string is all of small case
 func generate(prob int, old string) thisString {
 	t := thisString{}
 	t.old = []rune(old)
@@ -78,6 +81,22 @@ func readInputChar() rune {
 
 }
 
+func getWords(fileName string) []string {
+	var words = make([]string, 0)
+	_f, err := os.Open(fileName)
+	if err != nil {
+		panic(err)
+	}
+	file := bufio.NewReader(_f)
+	for {
+		line, _, err1 := file.ReadLine()
+		if err1 != nil {
+			break
+		}
+		words = append(words, strings.ToLower(string(line)))
+	}
+	return words
+}
 func getWord(fileName string, noOfWords int) string {
 	nth := rand.Intn(noOfWords)
 
@@ -98,13 +117,14 @@ func getWord(fileName string, noOfWords int) string {
 		panic(err)
 	}
 
-	return string(word)
+	return strings.ToLower(string(word))
 
 }
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
 	word := getWord("words.txt", 300)
+	println(word)
 	game := generate(50, word)
 	for attempt := 0; attempt < 10; attempt++ {
 		fmt.Printf("%-4d %s\r", 10-attempt, string(game.game))
@@ -118,7 +138,6 @@ func main() {
 			return
 		}
 	}
-
 	fmt.Printf("Out of attempts\nWord was %s", word)
 
 }
