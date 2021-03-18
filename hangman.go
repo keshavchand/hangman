@@ -16,18 +16,39 @@ type thisString struct {
 	ended bool
 }
 
+func genSetRune(inp []rune) []rune {
+	digits := make([]int, 26)
+	for _, i := range inp {
+		digits[int(i)-'a'] = 1
+	}
+
+	digitSet := make([]rune, 0)
+	for _, i := range digits {
+		digitSet = append(digitSet, rune(i))
+	}
+	return digitSet
+}
+func findAndReplace(word *[]rune, needle rune, placeHolder rune) {
+	for idx, i := range *word {
+		if i == needle {
+			(*word)[idx] = placeHolder
+		}
+	}
+
+}
 func generate(prob int, old string) thisString {
 	t := thisString{}
 	t.old = []rune(old)
-	var partial []rune
-	for _, i := range t.old {
-		if rand.Intn(101) <= prob {
-			partial = append(partial, i)
-		} else {
-			partial = append(partial, '_')
+	setOfDigits := genSetRune(t.old)
+	t.game = make([]rune, len(t.old))
+	copy(t.game, t.old)
+	for idx, i := range setOfDigits {
+		if i != 0 {
+			if rand.Intn(101) <= prob {
+				findAndReplace(&t.game, rune(idx)+'a', '_')
+			}
 		}
 	}
-	t.game = partial
 	return t
 }
 
@@ -89,12 +110,12 @@ func main() {
 		fmt.Printf("%-4d %s\r", 10-attempt, string(game.game))
 		i := readInputChar()
 		if i == 0 {
-			break
+			return
 		}
 		if game.iterate(i) {
 			fmt.Printf("%-*s\n", len(word)+5, "Success")
-			fmt.Println(string(game.game))
-			break
+			fmt.Printf("The word was %s\n", string(game.game))
+			return
 		}
 	}
 
