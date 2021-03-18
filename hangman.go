@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/eiannone/keyboard"
@@ -123,21 +124,31 @@ func getWord(fileName string, noOfWords int) string {
 func main() {
 	rand.Seed(time.Now().UnixNano())
 
-	word := getWord("words.txt", 300)
-	println(word)
-	game := generate(50, word)
-	for attempt := 0; attempt < 10; attempt++ {
-		fmt.Printf("%-4d %s\r", 10-attempt, string(game.game))
-		i := readInputChar()
-		if i == 0 {
-			return
-		}
-		if game.iterate(i) {
-			fmt.Printf("%-*s\n", len(word)+5, "Success")
-			fmt.Printf("The word was %s\n", string(game.game))
-			return
-		}
+	//word := getWord("words.txt", 300)
+	words := getWords("words.txt")
+	var wg sync.WaitGroup
+	defer wg.Wait()
+	for _, word := range words {
+		println(word)
+		wg.Add(1)
+		go func(wg *sync.WaitGroup) {
+			_ = generate(50, word)
+			wg.Done()
+		}(&wg)
+		continue
+		//for attempt := 0; attempt < 10; attempt++ {
+		//	fmt.Printf("%-4d %s\r", 10-attempt, string(game.game))
+		//	i := readInputChar()
+		//	if i == 0 {
+		//		return
+		//	}
+		//	if game.iterate(i) {
+		//		fmt.Printf("%-*s\n", len(word)+5, "Success")
+		//		fmt.Printf("The word was %s\n", string(game.game))
+		//		return
+		//	}
+		//}
+		fmt.Printf("Out of attempts\nWord was %s", word)
 	}
-	fmt.Printf("Out of attempts\nWord was %s", word)
 
 }
